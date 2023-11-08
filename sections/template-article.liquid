@@ -1,4 +1,4 @@
-<article class="py-8 px-5">
+<article class="py-8">
   {% for block in section.blocks %}
     {% case block.type %}
       {% when 'article_title' %}
@@ -43,7 +43,7 @@
 
       {% when 'article_content' %}
         <div class="flex justify-center items-center">
-            <div class="max-w-7xl">
+            <div class="max-w-4xl px-5">
                 {{ article.content }}
             </div>
         </div>
@@ -52,6 +52,95 @@
     {% endcase %}
   {% endfor %}
 </article>
+
+{% if blog.comments_enabled? %}
+  <div>
+    {% if article.comments_count > 0 %}
+      <div class="flex-1 mx-auto px-4 max-w-4xl items-center justify-center">
+        <h1 class="text-lg mb-4 font-medium">See What People Are Saying</h1>
+
+        {% paginate article.comments by 12 %}
+          {% for comment in article.comments %}
+            <div class="flex-1 border my-4 px-4 py-2 sm:py-4 sm:px-6 leading-relaxed">
+              <span class="comment-author">{{ comment.author }}</span>
+              <span class="text-xs text-gray-400">{{ comment.created_at | date : format: 'default' }}</span>
+              <p class="text-sm">{{ comment.content }}</p>
+            </div>
+          {% endfor %}
+        {% endpaginate %}
+      
+      </div>
+    {% else %}
+        There are no comments in this article
+      
+    {% endif %}
+  </div>
+  <div id="comment_form">
+    {% form 'new_comment', article %}
+
+      <div class="flex-1 mx-auto items-center justify-center max-w-4xl px-4">
+
+    
+        {% if form.errors %}
+          <div class="border p-5">
+            <div class="flex flex-row items-center w-full my-3">
+              <div class="text-red-300">
+                {% render 'icon-failed' %}
+              </div>
+
+              <div class="text-sm font-medium ml-3">
+                Oh No! Your Comment Is Not Posted Successfully.
+              </div>
+            </div>
+            <ul class="px-4 mb-3 ml-7 list-decimal">
+              {% for error in form.errors %}
+                <li>
+                  <span>{{ form.errors.messages[error] }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% comment %} </div> {% endcomment %}
+          {% elsif form.posted_successfully? %}
+          <div class="flex flex-row items-center w-full my-3">
+            <div class="text-green-500">
+              {% render 'icon-success' %}
+            </div>
+
+            <div class="text-sm font-medium ml-3">
+              Comment Is Posted Successfully.
+            </div>
+          </div>  
+        {% endif %}
+
+        <div class="px-1 md:flex mb-3">
+          <div class="px-3 md:w-1/2 mb-3">
+            <label for="comment_author" class="font-medium text-gray-700 text-xs uppercase mb-2">Name</label>
+            <input class="w-full text-gray-700 px-4 py-3 border focus:outline-none " type="text" name="comment[author]" id="comment_author" placeholder="John Doe" required>
+          </div>
+          <div class="px-3 md:w-1/2">
+            <label for="comment_email" class="font-medium text-gray-700 text-xs uppercase mb-2">Email</label>
+            <input class="w-full text-gray-700 px-4 py-3 border focus:outline-none " type="email" name="comment[email]" id="comment_email" placeholder="John@Doe.com" required>
+          </div>
+        </div>
+
+        <div class="px-1 mb-3 md:flex">
+          <div class="md:w-full px-3">
+            <label for="comment_content" class="font-medium text-gray-700 text-xs uppercase mb-2">Comment</label>
+            <textarea id="comment_content" class="w-full h-32 px-4 py-3 text-gray-700 resize-none border focus:outline-none" name="comment[body]"  required></textarea>
+          </div>
+        </div>
+
+        <div class="px-1 mb-3 md:flex">
+          <div class="md:w-full px-3">
+            <input class="px-5 py-3 my-3 bg-gray-900 hover:bg-gray-500 text-white text-base w-full rounded cursor-pointer border font-medium" type="Submit" value="Post Comment">
+          </div>
+        </div>
+      </div>
+    {% endform %}
+  </div>
+
+{% endif %}
 
 {% schema %}
 {
